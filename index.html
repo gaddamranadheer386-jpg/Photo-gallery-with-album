@@ -1,0 +1,1215 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photo Gallery with Albums</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #5b5cf0;
+    --primary-dark: #4546d8;
+    --background: #f6f7fb;
+    --text: #202338;
+    --muted: #777b8e;
+    --white: #ffffff;
+    --border: #e8e9f1;
+    --danger: #e5484d;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: var(--background);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+header {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 7%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.logo {
+    font-size: 23px;
+    font-weight: bold;
+    color: var(--primary);
+}
+
+.logo span {
+    color: var(--text);
+}
+
+.header-note {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 35px auto;
+    padding: 0 24px;
+}
+
+.page-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 25px;
+}
+
+h1 {
+    font-size: 29px;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+button {
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 8px;
+    padding: 12px 17px;
+    transition: 0.2s;
+}
+
+button:focus-visible,
+input:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+}
+
+.primary-btn {
+    background: var(--primary);
+    color: white;
+    font-weight: bold;
+}
+
+.primary-btn:hover {
+    background: var(--primary-dark);
+}
+
+.secondary-btn {
+    background: white;
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.secondary-btn:hover {
+    background: #f0f0ff;
+}
+
+.danger-btn {
+    background: #fff0f0;
+    color: var(--danger);
+}
+
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+}
+
+.search-box {
+    width: 100%;
+    max-width: 350px;
+    padding: 12px 15px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+}
+
+.stats {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.album-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
+    gap: 23px;
+}
+
+.album-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.album-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(30, 35, 70, 0.08);
+}
+
+.album-cover {
+    height: 175px;
+    background: #e9eaff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.album-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.empty-cover {
+    font-size: 55px;
+}
+
+.album-info {
+    padding: 17px;
+}
+
+.album-info h3 {
+    font-size: 17px;
+    margin-bottom: 8px;
+    overflow-wrap: anywhere;
+}
+
+.album-info p {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.album-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.album-actions button {
+    flex: 1;
+    padding: 9px 10px;
+    font-size: 12px;
+}
+
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 65px 20px;
+    background: white;
+    border: 1px dashed #d5d7e5;
+    border-radius: 13px;
+}
+
+.empty-state .icon {
+    font-size: 55px;
+    margin-bottom: 15px;
+}
+
+.empty-state h3 {
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: var(--muted);
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.album-page {
+    display: none;
+}
+
+.album-page.active {
+    display: block;
+}
+
+.home-page.hidden {
+    display: none;
+}
+
+.album-top {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+}
+
+.album-top h1 {
+    margin-bottom: 7px;
+}
+
+.album-top .spacer {
+    flex: 1;
+}
+
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 18px;
+}
+
+.photo-card {
+    position: relative;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+.photo-card img {
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+    display: block;
+    cursor: pointer;
+    background: #e9eaff;
+}
+
+.photo-name {
+    padding: 12px;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.delete-photo {
+    position: absolute;
+    top: 9px;
+    right: 9px;
+    background: white;
+    color: var(--danger);
+    padding: 8px 10px;
+    box-shadow: 0 2px 10px #0002;
+}
+
+footer {
+    text-align: center;
+    padding: 35px 20px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+/* Dialog boxes */
+
+dialog {
+    width: min(420px, calc(100% - 30px));
+    margin: auto;
+    border: none;
+    border-radius: 14px;
+    padding: 25px;
+    box-shadow: 0 20px 80px #0003;
+}
+
+dialog::backdrop {
+    background: rgba(20, 25, 50, 0.5);
+}
+
+dialog h2 {
+    margin-bottom: 20px;
+    font-size: 22px;
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.lightbox {
+    width: min(900px, calc(100% - 25px));
+    max-width: none;
+    padding: 15px;
+    background: #171717;
+    color: white;
+}
+
+.lightbox img {
+    display: block;
+    max-width: 100%;
+    max-height: 75vh;
+    margin: 10px auto;
+    object-fit: contain;
+}
+
+.lightbox-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.lightbox-top button {
+    background: #333;
+    color: white;
+}
+
+#toast {
+    position: fixed;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #222338;
+    color: white;
+    padding: 13px 20px;
+    border-radius: 9px;
+    font-size: 14px;
+    z-index: 100;
+    display: none;
+    max-width: calc(100% - 30px);
+    text-align: center;
+}
+
+#toast.show {
+    display: block;
+}
+
+@media (max-width: 600px) {
+    header {
+        padding: 17px 20px;
+    }
+
+    .container {
+        margin-top: 25px;
+        padding: 0 16px;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+
+    .album-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .album-cover {
+        height: 135px;
+    }
+
+    .album-info {
+        padding: 12px;
+    }
+
+    .album-actions {
+        flex-direction: column;
+    }
+
+    .photo-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .photo-card img {
+        height: 155px;
+    }
+
+    .search-box {
+        max-width: 100%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">📸 Photo<span>Gallery</span></div>
+    <div class="header-note">Your memories, organized.</div>
+</header>
+
+<main class="container">
+
+    <!-- HOME PAGE -->
+
+    <section class="home-page" id="homePage">
+
+        <div class="page-heading">
+            <div>
+                <h1>My Albums</h1>
+                <p class="subtitle">Organize your favorite memories in one place.</p>
+            </div>
+
+            <button class="primary-btn" id="createAlbumBtn">
+                + Create Album
+            </button>
+        </div>
+
+        <div class="toolbar">
+            <input
+                type="search"
+                class="search-box"
+                id="searchInput"
+                placeholder="🔍 Search albums..."
+                aria-label="Search albums"
+            >
+
+            <div class="stats" id="albumStats">0 albums</div>
+        </div>
+
+        <div class="album-grid" id="albumGrid"></div>
+
+    </section>
+
+    <!-- INDIVIDUAL ALBUM PAGE -->
+
+    <section class="album-page" id="albumPage">
+
+        <div class="album-top">
+            <button class="secondary-btn" id="backBtn">← Back</button>
+
+            <div>
+                <h1 id="albumTitle">Album</h1>
+                <p class="subtitle" id="photoCount">0 photos</p>
+            </div>
+
+            <div class="spacer"></div>
+
+            <button class="primary-btn" id="uploadBtn">
+                + Upload Photos
+            </button>
+
+            <input
+                type="file"
+                id="photoInput"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                multiple
+                hidden
+            >
+        </div>
+
+        <div class="photo-grid" id="photoGrid"></div>
+
+    </section>
+
+</main>
+
+<footer>
+    Photo Gallery with Albums · Mini Project
+</footer>
+
+<!-- CREATE ALBUM DIALOG -->
+
+<dialog id="albumDialog">
+    <form id="albumForm">
+        <h2>Create New Album</h2>
+
+        <div class="form-group">
+            <label for="albumName">Album Name</label>
+            <input
+                type="text"
+                id="albumName"
+                placeholder="e.g. Friends, Family, College"
+                maxlength="60"
+                required
+            >
+        </div>
+
+        <div class="dialog-actions">
+            <button type="button" class="secondary-btn" id="cancelAlbumBtn">
+                Cancel
+            </button>
+            <button type="submit" class="primary-btn">
+                Create Album
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<!-- PHOTO VIEWER -->
+
+<dialog id="lightbox" class="lightbox">
+    <div class="lightbox-top">
+        <span id="lightboxName"></span>
+        <button id="closeLightboxBtn" type="button">✕ Close</button>
+    </div>
+    <img id="lightboxImage" src="" alt="Selected photo">
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+
+/*
+  Photo Gallery with Albums
+  Storage: IndexedDB
+  No server or external libraries required.
+*/
+
+const DB_NAME = "PhotoGalleryDB";
+const DB_VERSION = 1;
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB per image
+
+let db;
+let currentAlbumId = null;
+let toastTimer;
+
+/* ------------------------------
+   DATABASE
+-------------------------------- */
+
+function openDatabase() {
+    return new Promise((resolve, reject) => {
+        if (!("indexedDB" in window)) {
+            reject(new Error("Your browser does not support IndexedDB."));
+            return;
+        }
+
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+        request.onupgradeneeded = event => {
+            const database = event.target.result;
+
+            if (!database.objectStoreNames.contains("albums")) {
+                const albums = database.createObjectStore("albums", {
+                    keyPath: "id",
+                    autoIncrement: true
+                });
+
+                albums.createIndex("createdAt", "createdAt");
+            }
+
+            if (!database.objectStoreNames.contains("photos")) {
+                const photos = database.createObjectStore("photos", {
+                    keyPath: "id",
+                    autoIncrement: true
+                });
+
+                photos.createIndex("albumId", "albumId");
+            }
+        };
+
+        request.onsuccess = () => {
+            db = request.result;
+            resolve(db);
+        };
+
+        request.onerror = () => {
+            reject(request.error || new Error("Could not open the database."));
+        };
+    });
+}
+
+function getAll(storeName) {
+    return new Promise((resolve, reject) => {
+        const request = db.transaction(storeName, "readonly")
+            .objectStore(storeName)
+            .getAll();
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+function getById(storeName, id) {
+    return new Promise((resolve, reject) => {
+        const request = db.transaction(storeName, "readonly")
+            .objectStore(storeName)
+            .get(id);
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+function addRecord(storeName, record) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(storeName, "readwrite");
+        const request = transaction.objectStore(storeName).add(record);
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+function deleteRecord(storeName, id) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(storeName, "readwrite");
+        const request = transaction.objectStore(storeName).delete(id);
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+    });
+}
+
+function getPhotosByAlbum(albumId) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction("photos", "readonly");
+        const index = transaction.objectStore("photos").index("albumId");
+        const request = index.getAll(albumId);
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/* ------------------------------
+   ELEMENTS
+-------------------------------- */
+
+const homePage = document.getElementById("homePage");
+const albumPage = document.getElementById("albumPage");
+const albumGrid = document.getElementById("albumGrid");
+const photoGrid = document.getElementById("photoGrid");
+
+const albumDialog = document.getElementById("albumDialog");
+const albumForm = document.getElementById("albumForm");
+const albumNameInput = document.getElementById("albumName");
+
+const photoInput = document.getElementById("photoInput");
+const searchInput = document.getElementById("searchInput");
+
+const toast = document.getElementById("toast");
+
+/* ------------------------------
+   HELPERS
+-------------------------------- */
+
+function showToast(message) {
+    toast.textContent = message;
+    toast.classList.add("show");
+
+    clearTimeout(toastTimer);
+
+    toastTimer = setTimeout(() => {
+        toast.classList.remove("show");
+    }, 3000);
+}
+
+function createElement(tag, className, text) {
+    const element = document.createElement(tag);
+
+    if (className) {
+        element.className = className;
+    }
+
+    if (text !== undefined) {
+        element.textContent = text;
+    }
+
+    return element;
+}
+
+function formatCount(count, word) {
+    return count + " " + word + (count === 1 ? "" : "s");
+}
+
+function formatDate(timestamp) {
+    return new Date(timestamp).toLocaleDateString();
+}
+
+function createImage(blob, alt) {
+    const image = document.createElement("img");
+    image.alt = alt;
+
+    const url = URL.createObjectURL(blob);
+    image.src = url;
+
+    image.addEventListener("load", () => {
+        URL.revokeObjectURL(url);
+    }, { once: true });
+
+    image.addEventListener("error", () => {
+        URL.revokeObjectURL(url);
+    }, { once: true });
+
+    return image;
+}
+
+/* ------------------------------
+   RENDER ALBUMS
+-------------------------------- */
+
+async function renderAlbums() {
+    const albums = await getAll("albums");
+    const searchTerm = searchInput.value.trim().toLowerCase();
+
+    albumGrid.replaceChildren();
+
+    const filteredAlbums = albums
+        .filter(album => album.name.toLowerCase().includes(searchTerm))
+        .sort((a, b) => b.createdAt - a.createdAt);
+
+    document.getElementById("albumStats").textContent =
+        formatCount(albums.length, "album");
+
+    if (filteredAlbums.length === 0) {
+        const empty = createElement("div", "empty-state");
+
+        empty.append(
+            createElement("div", "icon", searchTerm ? "🔍" : "📷"),
+            createElement(
+                "h3",
+                "",
+                searchTerm ? "No albums found" : "No albums yet"
+            ),
+            createElement(
+                "p",
+                "",
+                searchTerm
+                    ? "Try another search."
+                    : "Create your first album and start adding memories."
+            )
+        );
+
+        if (!searchTerm) {
+            const button = createElement(
+                "button",
+                "primary-btn",
+                "+ Create Your First Album"
+            );
+
+            button.addEventListener("click", openAlbumDialog);
+            empty.append(button);
+        }
+
+        albumGrid.append(empty);
+        return;
+    }
+
+    for (const album of filteredAlbums) {
+        const photos = await getPhotosByAlbum(album.id);
+
+        const card = createElement("article", "album-card");
+        const cover = createElement("div", "album-cover");
+
+        cover.setAttribute("role", "button");
+        cover.setAttribute("tabindex", "0");
+        cover.setAttribute("aria-label", "Open " + album.name);
+
+        if (photos.length > 0) {
+            const image = createImage(
+                photos[0].image,
+                album.name + " cover"
+            );
+
+            cover.append(image);
+        } else {
+            cover.append(createElement("div", "empty-cover", "📁"));
+        }
+
+        cover.addEventListener("click", () => openAlbum(album.id));
+
+        cover.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                openAlbum(album.id);
+            }
+        });
+
+        const info = createElement("div", "album-info");
+
+        info.append(
+            createElement("h3", "", album.name),
+            createElement("p", "", formatCount(photos.length, "photo")),
+            createElement("p", "", "Created " + formatDate(album.createdAt))
+        );
+
+        const actions = createElement("div", "album-actions");
+
+        const viewButton = createElement(
+            "button",
+            "secondary-btn",
+            "View Album"
+        );
+
+        viewButton.addEventListener("click", () => openAlbum(album.id));
+
+        const deleteButton = createElement(
+            "button",
+            "danger-btn",
+            "Delete"
+        );
+
+        deleteButton.addEventListener("click", () => deleteAlbum(album.id));
+
+        actions.append(viewButton, deleteButton);
+        info.append(actions);
+        card.append(cover, info);
+        albumGrid.append(card);
+    }
+}
+
+/* ------------------------------
+   CREATE ALBUM
+-------------------------------- */
+
+function openAlbumDialog() {
+    albumForm.reset();
+    albumDialog.showModal();
+    albumNameInput.focus();
+}
+
+document.getElementById("createAlbumBtn")
+    .addEventListener("click", openAlbumDialog);
+
+document.getElementById("cancelAlbumBtn")
+    .addEventListener("click", () => albumDialog.close());
+
+albumForm.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const name = albumNameInput.value.trim();
+
+    if (!name) {
+        showToast("Please enter an album name.");
+        return;
+    }
+
+    try {
+        await addRecord("albums", {
+            name,
+            createdAt: Date.now()
+        });
+
+        albumDialog.close();
+
+        await renderAlbums();
+
+        showToast("Album created successfully!");
+    } catch (error) {
+        console.error(error);
+        showToast("Could not create album.");
+    }
+});
+
+/* ------------------------------
+   OPEN ALBUM
+-------------------------------- */
+
+async function openAlbum(albumId) {
+    const album = await getById("albums", albumId);
+
+    if (!album) {
+        showToast("Album not found.");
+        await renderAlbums();
+        return;
+    }
+
+    currentAlbumId = albumId;
+
+    document.getElementById("albumTitle").textContent = album.name;
+
+    homePage.classList.add("hidden");
+    albumPage.classList.add("active");
+
+    await renderPhotos();
+}
+
+/* ------------------------------
+   RENDER PHOTOS
+-------------------------------- */
+
+async function renderPhotos() {
+    if (currentAlbumId === null) return;
+
+    const album = await getById("albums", currentAlbumId);
+
+    if (!album) {
+        goHome();
+        return;
+    }
+
+    const photos = await getPhotosByAlbum(currentAlbumId);
+
+    document.getElementById("photoCount").textContent =
+        formatCount(photos.length, "photo");
+
+    photoGrid.replaceChildren();
+
+    if (photos.length === 0) {
+        const empty = createElement("div", "empty-state");
+
+        empty.append(
+            createElement("div", "icon", "🖼️"),
+            createElement("h3", "", "No photos in this album"),
+            createElement(
+                "p",
+                "",
+                "Upload your first photo to get started."
+            )
+        );
+
+        const button = createElement(
+            "button",
+            "primary-btn",
+            "+ Upload Photos"
+        );
+
+        button.addEventListener("click", () => photoInput.click());
+
+        empty.append(button);
+        photoGrid.append(empty);
+        return;
+    }
+
+    photos.sort((a, b) => b.createdAt - a.createdAt);
+
+    for (const photo of photos) {
+        const card = createElement("article", "photo-card");
+
+        const image = createImage(photo.image, photo.name);
+
+        image.addEventListener("click", () => openLightbox(photo));
+
+        const name = createElement("div", "photo-name", photo.name);
+
+        const deleteButton = createElement(
+            "button",
+            "delete-photo",
+            "✕ Delete"
+        );
+
+        deleteButton.setAttribute(
+            "aria-label",
+            "Delete " + photo.name
+        );
+
+        deleteButton.addEventListener("click", () => deletePhoto(photo.id));
+
+        card.append(image, name, deleteButton);
+        photoGrid.append(card);
+    }
+}
+
+/* ------------------------------
+   UPLOAD PHOTOS
+-------------------------------- */
+
+document.getElementById("uploadBtn")
+    .addEventListener("click", () => photoInput.click());
+
+photoInput.addEventListener("change", async () => {
+    const files = Array.from(photoInput.files || []);
+
+    if (files.length === 0) return;
+
+    let added = 0;
+    let rejected = 0;
+
+    try {
+        for (const file of files) {
+            if (!file.type.startsWith("image/")) {
+                rejected++;
+                continue;
+            }
+
+            if (file.size > MAX_FILE_SIZE) {
+                rejected++;
+                continue;
+            }
+
+            await addRecord("photos", {
+                albumId: currentAlbumId,
+                name: file.name,
+                image: file,
+                createdAt: Date.now()
+            });
+
+            added++;
+        }
+
+        await renderPhotos();
+
+        showToast(
+            added + " photo(s) uploaded." +
+            (rejected ? " " + rejected + " file(s) skipped." : "")
+        );
+    } catch (error) {
+        console.error(error);
+        showToast("An error occurred while uploading photos.");
+        await renderPhotos();
+    } finally {
+        photoInput.value = "";
+    }
+});
+
+/* ------------------------------
+   DELETE PHOTO
+-------------------------------- */
+
+async function deletePhoto(photoId) {
+    const confirmed = confirm("Are you sure you want to delete this photo?");
+
+    if (!confirmed) return;
+
+    try {
+        await deleteRecord("photos", photoId);
+
+        await renderPhotos();
+        await renderAlbums();
+
+        showToast("Photo deleted successfully.");
+    } catch (error) {
+        console.error(error);
+        showToast("Could not delete photo.");
+    }
+}
+
+/* ------------------------------
+   DELETE ALBUM
+-------------------------------- */
+
+async function deleteAlbum(albumId) {
+    const album = await getById("albums", albumId);
+
+    if (!album) return;
+
+    const confirmed = confirm(
+        'Delete the album "' + album.name +
+        '" and all photos inside it?'
+    );
+
+    if (!confirmed) return;
+
+    try {
+        const photos = await getPhotosByAlbum(albumId);
+
+        for (const photo of photos) {
+            await deleteRecord("photos", photo.id);
+        }
+
+        await deleteRecord("albums", albumId);
+
+        await renderAlbums();
+
+        showToast("Album deleted successfully.");
+    } catch (error) {
+        console.error(error);
+        showToast("Could not delete album.");
+    }
+}
+
+/* ------------------------------
+   BACK TO HOME
+-------------------------------- */
+
+function goHome() {
+    currentAlbumId = null;
+
+    albumPage.classList.remove("active");
+    homePage.classList.remove("hidden");
+
+    renderAlbums().catch(console.error);
+}
+
+document.getElementById("backBtn").addEventListener("click", goHome);
+
+/* ------------------------------
+   SEARCH
+-------------------------------- */
+
+searchInput.addEventListener("input", () => {
+    renderAlbums().catch(error => {
+        console.error(error);
+        showToast("Could not load albums.");
+    });
+});
+
+/* ------------------------------
+   PHOTO VIEWER
+-------------------------------- */
+
+function openLightbox(photo) {
+    const image = document.getElementById("lightboxImage");
+    const name = document.getElementById("lightboxName");
+
+    image.src = URL.createObjectURL(photo.image);
+    image.alt = photo.name;
+
+    name.textContent = photo.name;
+
+    document.getElementById("lightbox").showModal();
+}
+
+function closeLightbox() {
+    const dialog = document.getElementById("lightbox");
+    const image = document.getElementById("lightboxImage");
+
+    dialog.close();
+
+    if (image.src.startsWith("blob:")) {
+        URL.revokeObjectURL(image.src);
+    }
+
+    image.removeAttribute("src");
+}
+
+document.getElementById("closeLightboxBtn")
+    .addEventListener("click", closeLightbox);
+
+document.getElementById("lightbox")
+    .addEventListener("click", event => {
+        if (event.target === event.currentTarget) {
+            closeLightbox();
+        }
+    });
+
+/* ------------------------------
+   START APPLICATION
+-------------------------------- */
+
+async function init() {
+    try {
+        await openDatabase();
+        await renderAlbums();
+    } catch (error) {
+        console.error(error);
+
+        document.getElementById("homePage").replaceChildren(
+            createElement("h2", "", "Unable to open Photo Gallery"),
+            createElement(
+                "p",
+                "",
+                "Please use an updated browser with IndexedDB enabled."
+            )
+        );
+    }
+}
+
+init();
+</script>
+
+</body>
+</html>
